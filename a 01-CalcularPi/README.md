@@ -1,6 +1,9 @@
 Materia:Algoritmos y Estructura de Datos
+
 Curso:k1102
+
 Profesor: Eduardo Zúñiga
+
 Alumno: Karol Liam 
 
 Descripcion del tp: El codigo es bastante simple, en el main defino un variable tipo double "pi" y una variable de tipo entero "contador".Para asignarle el valor a pi

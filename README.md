@@ -4,7 +4,7 @@ Curso:k1102
 
 Profesor: Eduardo Zúñiga
 
-Alumno: Karol Liam
+Alumno: Karol Trepat Liam
 
 Legajo:209.624-9
 

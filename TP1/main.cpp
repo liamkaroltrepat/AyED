@@ -6,21 +6,20 @@ using namespace std;
 
 const int dprod = 10; // Longitud del producto
 const int dprov = 19; // Longitud de la provincia
-const int cprod = 100; // Cantidad de productos. No deberian ser mas de 100 productos (arreglos estaticos)
-const int cdocks = 8; // Cantidad de docks
+const int cprod = 100; // Cantidad de productos (maxima no de berian ser mas)
+const int clocks = 8; // Cantidad de Locks
 
 struct Despacho {
-    int nroDock;        // se podria llamar Registro pero me parecio que en este caso Despacho era un buen nombre
-    string producto;    
-    string provincia;  
-    int cantidad;      
+    int nroDock;        // Número del dock (0 a 7)
+    string producto;    // Producto (10 caracteres)
+    string provincia;   // Provincia (19 caracteres)
+    int cantidad;       // Cantidad despachada
 };
 
-
 struct DockInfo {
-    int totalDespachos;          // total de despachos realizados en el dock
-    string productos[cprod];       // no se cuantos productos van a ser
-    int cantidades[cprod];         // cantidades totales de cada producto
+    int totalDespachos;          // Total de despachos realizados en el dock
+    string productos[cprod];       // Lista de productos únicos
+    int cantidades[cprod];         // Cantidades totales de cada producto
     int productosCount;          // Número de productos únicos
 };
 
@@ -32,8 +31,9 @@ fstream& operator>>(fstream &fs, Despacho &ds) {
     return fs;
 }
 
+// Función para procesar los despachos
 void procesarDespachos(Despacho despachos[], int cantidadDespachos, DockInfo docks[]) {
-    for (int i = 0; i < cdocks; i++) {
+    for (int i = 0; i < clocks; i++) {
         docks[i].totalDespachos = 0;
         docks[i].productosCount = 0;
     }
@@ -63,8 +63,9 @@ void procesarDespachos(Despacho despachos[], int cantidadDespachos, DockInfo doc
     }
 }
 
+// Función para listar despachos por dock
 void listarDocks(DockInfo docks[]) {
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < clocks; i++) {
         DockInfo& dock = docks[i];
         cout << "Dock " << i << ": " << dock.totalDespachos << " despachos" << endl;
 
@@ -85,17 +86,34 @@ void listarDocks(DockInfo docks[]) {
     }
 }
 
-template <typename T, typename Comparator>
-int buscarExtremo(T elementos[], int cantidad, Comparator criterio) {
+// Criterio de comparación para encontrar el dock con menos despachos
+int criterioMenor(const DockInfo& a, const DockInfo& b) {
+    if (a.totalDespachos < b.totalDespachos) {
+        return 1; // a es menor, buscamos el mínimo
+    } else if (a.totalDespachos > b.totalDespachos) {
+        return -1; // a es mayor
+    } else {
+        return 0; // son iguales
+    }
+}
+
+// Criterio de comparación para encontrar el producto con mayor cantidad
+int criterioMayor(const int& a, const int& b) {
+    return (a > b) ? 1 : (a < b) ? -1 : 0;
+}
+// Función genérica para buscar el extremo (min o max) según el criterio
+template <typename T>
+int buscarExtremo(T elementos[], int cantidad, int (*criterio)(const T&, const T&)) {
     int extremoIndex = 0;
     for (int i = 1; i < cantidad; i++) {
-        if (criterio(elementos[i], elementos[extremoIndex])) {
+        if (criterio(elementos[i], elementos[extremoIndex]) > 0) {
             extremoIndex = i;
         }
     }
     return extremoIndex;
 }
 
+// Función para listar los despachos de un producto específico en un dock
 void listarDespachosPorProducto(DockInfo& dock, const string& producto, Despacho despachos[], int cantidadDespachos, DockInfo docks[]) {
     cout << "\nDespachos de producto: " << producto << " en Dock: " << &dock - docks << endl;
     for (int i = 0; i < cantidadDespachos; i++) {
@@ -130,18 +148,14 @@ int main() {
     listarDocks(docks);
 
     // Encontrar dock con menos despachos
-    int dockMinIndex = buscarExtremo(docks, 8, [](DockInfo& a, DockInfo& b) {
-        return a.totalDespachos < b.totalDespachos;
-    });
+    int dockMinIndex = buscarExtremo(docks, 8, criterioMenor);
     DockInfo& dockMin = docks[dockMinIndex];
 
     cout << "\nDock con menos despachos: " << dockMinIndex
          << " (" << dockMin.totalDespachos << " despachos)\n";
 
     // Producto con mayor cantidad en ese dock
-    int maxProductoIndex = buscarExtremo(dockMin.cantidades, dockMin.productosCount, [](int a, int b) {
-        return a > b;
-    });
+    int maxProductoIndex = buscarExtremo(dockMin.cantidades, dockMin.productosCount, criterioMayor);
     cout << "Producto más despachado: " << dockMin.productos[maxProductoIndex]
          << " (" << dockMin.cantidades[maxProductoIndex] << " unidades)\n";
 

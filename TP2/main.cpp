@@ -174,6 +174,24 @@ void actualizarStockListado(Nodo<Stock>* &l_stk, Nodo<Pedido>* p_ped)
     }
 }
 
+void vaciarStock(Nodo<Stock>* &l_stock) {
+    while (l_stock != nullptr) {
+        // Liberar la lista de lotes dentro de cada nodo de stock
+        Nodo<Lote>* l_lotes = l_stock->dato.l_lotes;
+        while (l_lotes != nullptr) {
+            Nodo<Lote>* aux_lote = l_lotes;
+            l_lotes = l_lotes->sig;
+            delete aux_lote;
+        }
+
+        // Liberar el nodo del stock actual
+        Nodo<Stock>* aux_stock = l_stock;
+        l_stock = l_stock->sig;
+        delete aux_stock;
+    }
+    l_stock = nullptr;
+}
+
 int main() {
     Nodo<Stock>* l_stock = nullptr;
 
@@ -231,6 +249,7 @@ int main() {
     // Mostrar stock final
     cout << "Stock final" << endl;
     listarStock(l_stock);
-
+    vaciarStock(l_stock);
+    mostrar(l_stock);
     return 0;
 }
